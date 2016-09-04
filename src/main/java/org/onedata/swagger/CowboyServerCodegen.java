@@ -32,7 +32,7 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
         outputFolder = "generated-code" + File.separator + "cowboy";
 
         // no model
-        modelTemplateFiles.clear(); //put("rest_model.mustache", ".erl");
+        modelTemplateFiles.clear();
         
         apiTemplateFiles.put("rest_api.mustache", ".erl");
         
@@ -43,9 +43,10 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
 
         setReservedWordsLowerCase(
                 Arrays.asList(
-                    "after", "and", "andalso", "band", "begin", "bnot", "bor", "bsl", 
-                    "bsr", "bxor", "case", "catch", "cond", "div", "end", "fun", "if", 
-                    "let", "not", "of", "or", "orelse", "receive", "rem", "try", "when", "xor")
+                    "after", "and", "andalso", "band", "begin", "bnot", "bor", 
+                    "bsl", "bsr", "bxor", "case", "catch", "cond", "div", "end",
+                    "fun", "if", "let", "not", "of", "or", "orelse", "receive", 
+                    "rem", "try", "when", "xor")
         );
 
         languageSpecificPrimitives.add("int");
@@ -77,11 +78,8 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     public void processOpts() {
         super.processOpts();
 
-        // use constant model/api package (folder path)
-        //setModelPackage("models");
-        //setApiPackage("api");
-
-        supportingFiles.add(new SupportingFile("rest_model.mustache", "", "rest_model.erl"));
+        supportingFiles.add(new SupportingFile("rest_model.mustache", 
+                            "", "rest_model.erl"));
 
     }
 
@@ -123,7 +121,8 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
                         } else if ("tsv".equals(qp.getCollectionFormat())) {
                             paramPart.append("\t");
                         } else if ("multi".equals(qp.getCollectionFormat())) {
-                            paramPart.append("&").append(param.getName()).append("=");
+                            paramPart.append("&").append(param.getName())
+                                .append("=");
                             paramPart.append(param.getName() + "2");
                         }
                     } else {
@@ -146,7 +145,8 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     // Convert an HTTP path to a Cowboy route, i.e.:
     // /a/b/:c/e/:d instead of /a/b/{c}/e/{d}
     //
-    private String pathToCowboyRoute(String path, List<CodegenParameter> pathParams) {
+    private String pathToCowboyRoute(String path, 
+                                     List<CodegenParameter> pathParams) {
         // Map the capture params by their names.
         HashMap<String, String> captureTypes = new HashMap<String, String>();
         for (CodegenParameter param : pathParams) {
@@ -163,7 +163,6 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
         for (String piece : path.split("/")) {
             if (piece.startsWith("{") && piece.endsWith("}")) {
                 String name = piece.substring(1, piece.length() - 1);
-                //pathComponents.add("Capture \"" + name + "\" " + captureTypes.get(name));
                 pathComponents.add(":"+name);
             } else {
                 pathComponents.add(piece);
@@ -173,8 +172,10 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
         return "/"+ Joiner.on("/").join(pathComponents);
     }
 
-    public CodegenOperation fromOperation(String path, String httpMethod, Operation operation, Map<String, Model> definitions, Swagger swagger) {
-        CodegenOperation op = super.fromOperation(path, httpMethod, operation, definitions, swagger);
+    public CodegenOperation fromOperation(String path, String httpMethod, 
+        Operation operation, Map<String, Model> definitions, Swagger swagger) {
+        CodegenOperation op = super.fromOperation(path, httpMethod, 
+                                              operation, definitions, swagger);
 
         op.path = pathToCowboyRoute(path, op.pathParams);
 
@@ -203,7 +204,8 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
 
     @Override
     public String apiFileFolder() {
-        return outputFolder + File.separator + apiPackage.replace("/", File.separator);
+        return outputFolder + File.separator + apiPackage.replace("/", 
+                                                              File.separator);
     }
 
     public String getTypeDeclarationNoOptionalCheck(Property p) {
@@ -212,15 +214,19 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
             //ObjectProperty op = (ObjectProperty)p;
             //return toModelName(op.getName()) + "_model()"
             String result = "#{ ";
-            for(String subproperty_key : ((ObjectProperty) p).getProperties().keySet()) {
-                Property subproperty = ((ObjectProperty) p).getProperties().get(subproperty_key);
-                result = toVarName(subproperty.getName()) + " => " + getTypeDeclaration(subproperty) +",";
+            for(String subproperty_key : ((ObjectProperty) p).getProperties()
+                                                                  .keySet()) {
+                Property subproperty = ((ObjectProperty) p)
+                                         .getProperties().get(subproperty_key);
+                result = toVarName(subproperty.getName()) + " => " 
+                            + getTypeDeclaration(subproperty) +",";
             }
             return result;
         }
         else if (p instanceof RefProperty) {
             RefProperty rp = (RefProperty)p;
-            return toModelName(rp.get$ref().substring(rp.get$ref().lastIndexOf('/') + 1))+"_model()";
+            return toModelName(rp.get$ref().substring(rp.get$ref()
+                   .lastIndexOf('/') + 1))+"_model()";
         }
         else if (p instanceof ArrayProperty) {
             ArrayProperty ap = (ArrayProperty) p;
@@ -230,21 +236,12 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
         else if (p instanceof MapProperty) {
             MapProperty mp = (MapProperty) p;
             Property inner = mp.getAdditionalProperties();
-            //return getSwaggerType(p) + "[string," + getTypeDeclaration(inner) + "]";
             return "#{ '_' => " + getTypeDeclaration(inner) + "}";
         }
         else if(p instanceof StringProperty) {
             StringProperty sp = (StringProperty)p;
             return "string";
         }
-        /*else if(p instanceof StringProperty) {
-            if( (((StringProperty)p).getEnum() != null) && (!((StringProperty)p).getEnum().isEmpty()) ) {
-                return "atom";
-            }
-            else {
-                return "string";
-            }
-        }*/
         else if(p.getVendorExtensions().containsKey("x-erlang-datatype")) {
             return (String)p.getVendorExtensions().get("x-erlang-datatype");
         }
@@ -255,13 +252,7 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
 
     @Override
     public String getTypeDeclaration(Property p) {
-        //if(!p.getRequired()) {
-        //    return " {" + getTypeDeclarationNoOptionalCheck(p) + ", optional}";
-        //}
-        //else {
         return getTypeDeclarationNoOptionalCheck(p);
-        //}
-
     }
 
     @Override
@@ -291,22 +282,13 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     @Override
     public String toVarName(String name) {
         // replace - with _ e.g. created-at => created_at
-        name = name.replaceAll("-", "_"); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.
+        name = name.replaceAll("-", "_"); 
 
         // if it's all uppper case, convert to lower case
         if (name.matches("^[A-Z_]*$")) {
             name = name.toLowerCase();
         }
 
-        /*
-        // petId => pet_id
-        name = underscore(name);
-
-        // for reserved word or word starting with number, append _
-        if (isReservedWord(name) || name.matches("^\\d.*")) {
-            name = escapeReservedWord(name);
-        }
-        */
 
         return name;
     }
@@ -321,7 +303,8 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     public String toModelName(String name) {
         // model name cannot use reserved keyword, e.g. return
         if (isReservedWord(name)) {
-            throw new RuntimeException(name + " (reserved word) cannot be used as a model name");
+            throw new RuntimeException(name 
+                         + " (reserved word) cannot be used as a model name");
         }
 
         // camelize the model name
@@ -333,7 +316,8 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     public String toModelFilename(String name) {
         // model name cannot use reserved keyword, e.g. return
         if (isReservedWord(name)) {
-            throw new RuntimeException(name + " (reserved word) cannot be used as a model name");
+            throw new RuntimeException(name 
+                         + " (reserved word) cannot be used as a model name");
         }
 
         // underscore the model file name
@@ -344,7 +328,7 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     @Override
     public String toApiFilename(String name) {
         // replace - with _ e.g. created-at => created_at
-        name = name.replaceAll("-", "_"); // FIXME: a parameter should not be assigned. Also declare the methods parameters as 'final'.
+        name = name.replaceAll("-", "_");
 
         // e.g. PhoneNumberApi.rb => phone_number_api.rb
         return underscore(name) + "_api";
@@ -363,18 +347,21 @@ public class CowboyServerCodegen extends DefaultCodegen implements CodegenConfig
     public String toOperationId(String operationId) {
         // method name cannot use reserved keyword, e.g. return
         if (isReservedWord(operationId)) {
-            throw new RuntimeException(operationId + " (reserved word) cannot be used as method name");
+            throw new RuntimeException(operationId 
+                            + " (reserved word) cannot be used as method name");
         }
 
         return underscore(operationId);
     }
 
     @Override
-    public Map<String, Object> postProcessSupportingFileData(Map<String, Object> objs) {
+    public Map<String, Object> postProcessSupportingFileData(Map<String, 
+                                                             Object> objs) {
         Swagger swagger = (Swagger)objs.get("swagger");
         if(swagger != null) {
             try {
-                objs.put("swagger-yaml", Yaml.mapper().writeValueAsString(swagger));
+                objs.put("swagger-yaml", Yaml.mapper()
+                                                .writeValueAsString(swagger));
             } catch (JsonProcessingException e) {
                 LOGGER.error(e.getMessage(), e);
             }

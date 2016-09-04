@@ -17,7 +17,14 @@ mvn assembly:assembly -DdescriptorId=jar-with-dependencies
 ```
 
 ### Running
+The library assumes that the current directory contains 2 files:
+* `rest_api.mustache` - a Mustache template for generating Cowboy routers and handlers
+* `rest_model.mustache` - a Mustache template for generating Erlang data types for input and output data models
+
 ```bash
 java -jar target/cowboy-swagger-codegen-1.0.0-jar-with-dependencies.jar generate -l cowboy -i ./swagger.json -o ./generated/cowboy
 ```
 
+## License
+
+See [LICENSE](./LICENSE)
