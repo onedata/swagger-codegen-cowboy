@@ -1,0 +1,94 @@
+%%%--------------------------------------------------------------------
+%%% This file has been automatically generated from Swagger
+%%% specification - DO NOT EDIT!
+%%%
+%%% @author Krzysztof Trzepla
+%%% @copyright (C) 2016 ACK CYFRONET AGH
+%%% This software is released under the MIT license
+%%% cited in 'LICENSE.txt'.
+%%% @end
+%%%--------------------------------------------------------------------
+%%% @doc This module contains REST models definitions.
+%%% @end
+%%%--------------------------------------------------------------------
+-module(rest_model).
+-author("Krzysztof Trzepla").
+
+-export([
+{{#models}}
+    {{#model}}
+    {{classname}}_model/0,
+    {{/model}}
+{{/models}}
+]).
+
+
+{{#models}}
+    {{#model}}
+        {{#description}}
+%%--------------------------------------------------------------------
+%% @doc {{description}}
+%% @end
+%%--------------------------------------------------------------------
+        {{/description}}
+        {{#vendorExtensions}}
+            {{#x-onedata-oneof}}
+-spec {{classname}}_model() -> {oneof, Oneof :: list()}.
+            {{/x-onedata-oneof}}
+            {{^x-onedata-oneof}}
+-spec {{classname}}_model() -> #{}.
+            {{/x-onedata-oneof}}
+        {{/vendorExtensions}}
+{{classname}}_model() ->
+        {{#vendorExtensions}}
+            {{#x-onedata-oneof}}
+    {oneof, [{{#x-onedata-subclasses}}{{.}}_model(),{{/x-onedata-subclasses}}]}.
+            {{/x-onedata-oneof}}
+            {{^x-onedata-oneof}}
+                {{#x-onedata-dictionary-value-type}}
+    #{ '_' => {{x-onedata-dictionary-value-type}}_model() }.
+                {{/x-onedata-dictionary-value-type}}
+                {{^x-onedata-dictionary-value-type}}
+    #{
+                    {{#vars}}
+                        {{#description}}
+        %% {{description}}
+                        {{/description}}
+                        {{#vendorExtensions}}
+                            {{#x-discriminator}}
+        {{name}} => {equal, <<"{{classname}}">>}{{#hasMore}},{{/hasMore}}
+                            {{/x-discriminator}}
+                            {{^x-discriminator}}
+                                {{#required}}
+                                    {{#x-onedata-datatype}}
+        {{name}} => {{x-onedata-datatype}}{{#hasMore}},{{/hasMore}}
+                                    {{/x-onedata-datatype}}
+                                    {{^x-onedata-datatype}}
+        {{name}} => {{datatype}}{{#hasMore}},{{/hasMore}}
+                                    {{/x-onedata-datatype}}
+                                {{/required}}
+                                {{^required}}
+                                    {{#vendorExtensions}}
+                                        {{#x-onedata-default-value}}
+        {{name}} => { {{datatype}}, {optional, {{x-onedata-default-value}} } }{{#hasMore}},{{/hasMore}}
+                                        {{/x-onedata-default-value}}
+                                        {{^x-onedata-default-value}}
+                                            {{#x-onedata-datatype}}
+        {{name}} => { {{x-onedata-datatype}}, optional }{{#hasMore}},{{/hasMore}}
+                                            {{/x-onedata-datatype}}
+                                            {{^x-onedata-datatype}}
+        {{name}} => { {{datatype}}, optional }{{#hasMore}},{{/hasMore}}
+                                            {{/x-onedata-datatype}}
+                                        {{/x-onedata-default-value}}
+                                    {{/vendorExtensions}}
+                                {{/required}}
+                            {{/x-discriminator}}
+                        {{/vendorExtensions}}
+                    {{/vars}}
+    }.
+                {{/x-onedata-dictionary-value-type}}
+            {{/x-onedata-oneof}}
+        {{/vendorExtensions}}
+    {{/model}}
+
+{{/models}}
